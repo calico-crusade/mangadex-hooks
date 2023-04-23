@@ -1,4 +1,7 @@
+using MangaDexHooks.Api;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +47,20 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler(err =>
+{
+	err.Run(async ctx =>
+	{
+		ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+		ctx.Response.ContentType = Application.Json;
+		var error = app.Environment.IsDevelopment() ? 
+			ctx.Features.Get<IExceptionHandlerFeature>()?.Error ??
+			ctx.Features.Get<IExceptionHandlerPathFeature>()?.Error : null;
+
+		await ctx.Response.WriteAsJsonAsync(ApiResults.Error(error ?? new Exception("An error has occurred, please reach out on discord for more information!")));
+	});
+});
 
 app.UseCors(c =>
 {

@@ -9,6 +9,7 @@ using Auth;
 using Database;
 using Database.Models;
 using Database.Services;
+using MangaDexSharp;
 
 public static class DiExtensions
 {
@@ -84,6 +85,7 @@ public static class DiExtensions
 				c.AddSQLite<SqlConfig>(a => a.OnInit(con => ExecuteFiles(con, "*.sqlite.sql")));
 			})
 			.AddCardboardHttp()
+			.AddMangaDex(string.Empty)
 			.AddTransient<IWebhookApiService, WebhookApiService>()
 			.AddTransient<IOAuthService, OAuthService>()
 			.AddTransient<ITokenService, TokenService>()
@@ -91,6 +93,7 @@ public static class DiExtensions
 			
 			.AddTransient<IWebhookDbService, WebhookDbService>()
 			.AddTransient<IProfileDbService, ProfileDbService>()
+			.AddTransient<IWebhookResultsDbService, WebhookResultsDbService>()
 			
 			.AddTransient<IDbService, DbService>();
 	}

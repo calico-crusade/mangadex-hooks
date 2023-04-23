@@ -21,4 +21,12 @@ public static class Extensions
 	{
 		return WebUtility.HtmlEncode(value);
 	}
+
+	public static string? PreferEn(this Localization locale)
+	{
+		var en = locale.ContainsKey("en") ? locale["en"] : null;
+		if (en != null) return en;
+
+		return locale.FirstOrDefault().Value;
+	}
 }

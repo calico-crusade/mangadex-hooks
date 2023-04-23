@@ -1,10 +1,13 @@
 ﻿global using CardboardBox.Database;
 global using CardboardBox.Database.Generation;
+global using CardboardBox.Http;
 
 global using Dapper;
 
 global using Discord;
 global using Discord.Webhook;
+
+global using MangaDexSharp;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;

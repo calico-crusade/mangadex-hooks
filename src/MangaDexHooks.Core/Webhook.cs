@@ -21,7 +21,7 @@ public class Webhook
 	public ulong? ThreadId { get; set; }
 
 	[JsonPropertyName("suppressEmbeds")]
-	public bool SuppressEmbeds { get; set; }
+	public bool SuppressEmbeds { get; set; } = false;
 
 	[JsonPropertyName("embeds")]
 	public List<WebhookEmbed> Embeds { get; set; } = new();
@@ -51,14 +51,14 @@ public class Webhook
 		[JsonPropertyName("image")]
 		public string? Image { get; set; }
 
+		[JsonPropertyName("thumbnail")]
+		public string? Thumbnail { get; set; }
+
 		[JsonPropertyName("author")]
 		public WebhookEmbedAuthor? Author { get; set; }
 
 		[JsonPropertyName("footer")]
 		public WebhookEmbedFooter? Footer { get; set; }
-
-		[JsonPropertyName("thumbnail")]
-		public string? Thumbnail { get; set; }
 
 		[JsonPropertyName("fields")]
 		public List<WebhookEmbedField> Fields { get; set; } = new();
