@@ -1,14 +1,14 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace MangaDexHooks.Core.Auth;
 
 public interface ITokenService
 {
 	TokenResult ParseToken(string token);
-	string GenerateToken(TokenResponse resp, params string[] roles);
+	string GenerateToken(TokenResponse resp, long id, params string[] roles);
+	string GenerateToken(Claim[] claims, params string[] roles);
 }
 
 public class TokenService : ITokenService
@@ -53,11 +53,22 @@ public class TokenService : ITokenService
 		return new(principals, securityToken);
 	}
 
-	public string GenerateToken(TokenResponse resp, params string[] roles)
+	public string GenerateToken(Claim[] claims, params string[] roles)
 	{
 		return new JwtToken(GetKey())
 			.SetAudience(Audience)
 			.SetIssuer(Issuer)
+			.AddClaim(claims)
+			.AddClaim(roles.Select(t => new Claim(ClaimTypes.Role, t)).ToArray())
+			.Write();
+	}
+
+	public string GenerateToken(TokenResponse resp, long id, params string[] roles)
+	{
+		return new JwtToken(GetKey())
+			.SetAudience(Audience)
+			.SetIssuer(Issuer)
+			.AddClaim(ClaimTypes.Uri, id.ToString())
 			.AddClaim(ClaimTypes.NameIdentifier, resp.User.Id)
 			.AddClaim(ClaimTypes.Name, resp.User.Nickname)
 			.AddClaim(ClaimTypes.Email, resp.User.Email)

@@ -1,4 +1,7 @@
-﻿global using MangaDexHooks;
+﻿global using CardboardBox.Database;
+global using CardboardBox.Http;
+
+global using MangaDexHooks;
 global using MangaDexHooks.Core;
 global using MangaDexHooks.Core.Auth;
 global using MangaDexHooks.Core.Database;

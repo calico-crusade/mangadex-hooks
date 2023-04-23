@@ -74,14 +74,8 @@ public abstract class OrmMap<T> where T : DbObject
 		return _sql.Paginate<T>(_paginateQuery, null, page, size);
 	}
 
-	public virtual async Task<int> Upsert(T item, bool fake = true)
+	public virtual async Task<long> Upsert(T item)
 	{
-		if (!fake)
-		{
-			_upsertQuery ??= _query.Upsert<T>();
-			return await _sql.Execute(_upsertQuery, item);
-		}
-
 		//Note: This is purely to combat the issue of postgres SERIAL and BIGSERIAL 
 		//		primary keys incrementing even if it was an update was preformed
 		//		because the record already exists
@@ -89,15 +83,16 @@ public abstract class OrmMap<T> where T : DbObject
 		if (_upsertFakeInsert == null || _upsertFakeSelect == null || _upsertFakeUpdate == null)
 		{
 			var (insert, update, select) = _fakeUpserts.FakeUpsert<T>();
-			_upsertFakeInsert = insert;
+			_upsertFakeInsert = insert + " RETURNING id";
 			_upsertFakeUpdate = update;
 			_upsertFakeSelect = select;
 		}
 
 		var exists = await _sql.Fetch<T>(_upsertFakeSelect, item);
 		if (exists == null)
-			return await _sql.Execute(_upsertFakeInsert, item);
-		return await _sql.Execute(_upsertFakeUpdate, item);
+			return await _sql.ExecuteScalar<long>(_upsertFakeInsert, item);
+		await _sql.Execute(_upsertFakeUpdate, item);
+		return exists.Id;
 	}
 	#endregion
 }

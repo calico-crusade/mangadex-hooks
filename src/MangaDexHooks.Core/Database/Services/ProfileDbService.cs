@@ -4,7 +4,7 @@ using Models;
 
 public interface IProfileDbService
 {
-	Task<int> Upsert(DbProfile profile, bool fake = true);
+	Task<long> Upsert(DbProfile profile);
 
 	Task<PaginatedResult<DbProfile>> Paginate(int page = 1, int size = 100);
 

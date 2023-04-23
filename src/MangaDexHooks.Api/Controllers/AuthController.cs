@@ -23,14 +23,14 @@ public class AuthController : ControllerBase
 	}
 
 	[HttpGet, Route("auth/{code}")]
+	[ProducesDefaultResponseType(typeof(SuccessResult<UserLoginResult>))]
+	[ProducesResponseType(typeof(FailureResult), 401)]
+	[ProducesResponseType(typeof(FailureResult), 500)]
 	public async Task<IActionResult> Auth(string code)
 	{
 		var res = await _auth.ResolveCode(code);
 		if (res == null || !string.IsNullOrEmpty(res.Error))
-			return Unauthorized(new
-			{
-				error = res?.Error ?? "Login Failed"
-			});
+			return Unauthorized(ApiResults.Error(401, "Invalid authorization code"));
 
 		var profile = new DbProfile
 		{
@@ -48,58 +48,37 @@ public class AuthController : ControllerBase
 		if (profile == null)
 		{
 			_logger.LogError("Could not find profile for newly upserted object: {profile}", profile.JsonSerialize());
-			return StatusCode(500, new
-			{
-				error = "An error occurred while generating profile"
-			});
+			return StatusCode(500, ApiResults.Error("Something went wrong while fetching your profile."));
 		}
 
-		var roles = profile.Admin ? new[] { "Admin" } : Array.Empty<string>();
-		var token = _token.GenerateToken(res, roles);
+		var user = (UserResult)profile;
+		var token = _token.GenerateToken((Claim[])user);
 
-		return Ok(new
+		return Ok(ApiResults.Success(new UserLoginResult
 		{
-			user = new
-			{
-				roles,
-				nickname = res.User.Nickname,
-				avatar = res.User.Avatar,
-				id = res.User.Id,
-				email = res.User.Email
-			},
-			token,
-			id = profile.Id
-		});
+			Token = token,
+			User = user
+		}));
 	}
 
 	[HttpGet, Route("auth"), Authorize]
+	[ProducesDefaultResponseType(typeof(SuccessResult<UserResult>))]
 	public IActionResult Me()
 	{
-		var user = this.UserFromIdentity();
-		if (user == null) return Unauthorized();
+		var claims = (UserResult)User.Claims.ToArray();
+		if (claims.ProfileId == 0) return Unauthorized();
 
-		var roles = User.Claims.Where(t => t.Type == ClaimTypes.Role).Select(t => t.Value).ToArray();
-
-		return Ok(new
-		{
-			roles,
-			nickname = user.Nickname,
-			avatar = user.Avatar,
-			id = user.Id,
-			email = user.Email
-		});
+		return Ok(ApiResults.Success(claims));
 	}
 
 	[HttpGet, Route("auth/url")]
+	[ProducesDefaultResponseType(typeof(SuccessResult<string>))]
 	public IActionResult AuthUrl([FromQuery] string? redirect = null)
 	{
 		var url = $"{_auth.Url}/Home/Auth/{_auth.AppId}";
 		if (!string.IsNullOrEmpty(redirect))
 			url += "?redirect=" + redirect.UrlEncode();
 
-		return Ok(new
-		{
-			url
-		});
+		return Ok(ApiResults.Success(url));
 	}
 }
