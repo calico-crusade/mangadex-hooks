@@ -10,15 +10,13 @@
 <style lang="scss" scoped>
     main {
         margin-right: 2px;
+        overflow: hidden;
+        max-width: 100%;
     }
 
     @media only screen and (max-width: 1050px) {
         .app-fix {
             flex-flow: column;
-
-            main {
-                overflow: hidden;
-            }
         }
     }
 </style>

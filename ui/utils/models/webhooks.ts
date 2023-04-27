@@ -6,9 +6,11 @@ export enum EmbedType {
 }
 
 export enum WebhookType {
+    Disabled = 0,
     Discord = 1,
     Json = 2,
-    Xml = 3
+    Xml = 3,
+    DiscordScript = 4
 }
 
 export interface DiscordField {
@@ -56,10 +58,24 @@ export interface Webhook extends DbObject {
     url: string;
     type: WebhookType;
     discordData?: DiscordWebhook;
+    discordScript?: string;
+}
+
+export interface WebhookHistory extends DbObject {
+    webhookId: number;
+    results: string;
+    code: number;
+}
+
+export interface WebhookHistoryWithRes {
+    hook: Webhook;
+    result: WebhookHistory;
 }
 
 export const HOOK_TYPES = [
     { text: 'Discord', value: WebhookType.Discord },
+    { text: 'Discord Script', value: WebhookType.DiscordScript },
     { text: 'JSON', value: WebhookType.Json },
-    { text: 'XML', value: WebhookType.Xml }
+    { text: 'XML', value: WebhookType.Xml },
+    { text: 'Disabled', value: WebhookType.Disabled }
 ];

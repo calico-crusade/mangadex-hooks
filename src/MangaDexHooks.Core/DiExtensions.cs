@@ -63,7 +63,9 @@ public static class DiExtensions
 					 a.CamelCase()
 					  .Entity<DbWebhookResult>()
 					  .Entity<DbWebhook>()
-					  .Entity<DbProfile>();
+					  .Entity<DbProfile>()
+					  .Entity<DbWatcher>()
+					  .Entity<DbMdCache>();
 
 					 a.DefaultJsonHandler<Webhook?>(() => null);
 
@@ -90,10 +92,14 @@ public static class DiExtensions
 			.AddTransient<IOAuthService, OAuthService>()
 			.AddTransient<ITokenService, TokenService>()
 			.AddTransient<IFakeUpsertQueryService, FakeUpsertQueryService>()
+			.AddTransient<IMdCacheService, MdCacheService>()
+			.AddTransient<IWatcherService, WatcherService>()
 			
 			.AddTransient<IWebhookDbService, WebhookDbService>()
 			.AddTransient<IProfileDbService, ProfileDbService>()
 			.AddTransient<IWebhookResultsDbService, WebhookResultsDbService>()
+			.AddTransient<ICacheDbService, CacheDbService>()
+			.AddTransient<IWatcherDbService, WatcherDbService>()
 			
 			.AddTransient<IDbService, DbService>();
 	}

@@ -23,3 +23,7 @@ export interface FailureResult extends ApiResult {
     result: 'error';
     errors: string[];
 }
+
+export interface MessageResult extends ApiResult {
+    message?: string;
+}

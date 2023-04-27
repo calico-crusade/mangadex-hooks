@@ -6,6 +6,7 @@ export class PaginationHelper<T> {
     results = ref<CollectionResult<T>>({ pages: 0, count: 0, data: [], result: 'ok', code: 200 });
     pending = ref(false);
     error = ref<FailureResult | undefined>(undefined);
+    data = computed(() => this.results.value.data);
 
     get page() { return this._page ?? 1; }
     set page(value: number) {
@@ -17,13 +18,15 @@ export class PaginationHelper<T> {
         private _url: string,
         private _params?: Params,
         private _page?: number,
-        public infinite: boolean = false
+        private _pred?: () => boolean
     ) { this.fetch(true); }
 
     private async fetch(reset: boolean = false) {
         if (this.pending.value) return;
+        if (this._pred && !this._pred()) return;
 
-        if (reset || this.infinite) {
+        if (reset) {
+            this._page = 1;
             this.results.value.data = [];
             this.results.value.count = 0;
             this.results.value.pages = 0;
@@ -58,6 +61,7 @@ export class PaginationHelper<T> {
     next() { this.page++; }
     prev() { this.page--; }
     set(page: number) { this.page = page; }
+    refresh() { this.fetch(true); }
 
     onScroll(element: HTMLElement) {
         if (!element) return;

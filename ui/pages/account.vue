@@ -7,14 +7,16 @@
 </template>
 
 <script lang="ts" setup>
-    const user = authApi.currentUser;
+const user = authApi.currentUser;
 
-    onMounted(() => {
-        if (!user.value) {
-            navigateTo('/');
-            return;
-        }
-    })
+useHead({ title: 'MD Hooks | Your account' });
+
+onMounted(() => {
+    if (!user.value) {
+        navigateTo('/');
+        return;
+    }
+})
 </script>
 
 <style lang="scss">

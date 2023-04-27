@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS webhooks (
     url TEXT NOT NULL,
     type INTEGER NOT NULL,
     discord_data TEXT NULL,
+    discord_script TEXT NULL,
 
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -42,4 +43,37 @@ CREATE TABLE IF NOT EXISTS webhook_results (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS mangadex_cache (
+    id INTEGER PRIMARY KEY,
+    
+    resource_id TEXT NOT NULL,
+    resource_type INTEGER NOT NULL,
+    results TEXT NOT NULL,
+    last_check TEXT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TEXT
+
+    UNIQUE(resource_id, resource_type)
+);
+
+CREATE TABLE IF NOT EXISTS watchers (
+    id INTEGER PRIMARY KEY,
+    
+    item_id TEXT NOT NULL,
+    watch_type INTEGER NOT NULL,
+    webhook_id INTEGER NOT NULL REFERENCES webhooks(id),
+    resource_image TEXT NOT NULL,
+    resource_name TEXT NOT NULL,
+    cache_items TEXT NOT NULL DEFAULT '[]',
+    last_cache_check TEXT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TEXT,
+
+    UNIQUE(item_id, watch_type, webhook_id)
 );

@@ -6,6 +6,7 @@ global using MangaDexHooks.Core;
 global using MangaDexHooks.Core.Auth;
 global using MangaDexHooks.Core.Database;
 global using MangaDexHooks.Core.Database.Models;
+global using MangaDexSharp;
 
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;

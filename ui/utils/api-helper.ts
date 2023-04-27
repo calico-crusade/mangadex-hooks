@@ -33,15 +33,15 @@ interface _AsyncData<DataT, ErrorT> {
     error: Ref<ErrorT | undefined>;
 }
 
-interface ErrorsAsync<T> extends _AsyncData<T, FetchError<any> | null> {
+export interface ErrorsAsync<T> extends _AsyncData<T, FetchError<any> | null> {
     apiError: Ref<FailureResult | undefined>;
 }
 
-interface ResultsAsync<T> extends ErrorsAsync<SuccessResult<T>> {
+export interface ResultsAsync<T> extends ErrorsAsync<SuccessResult<T>> {
     result: Ref<T | undefined>;
 }
 
-interface CollectionAsync<T> extends ErrorsAsync<CollectionResult<T>> {
+export interface CollectionAsync<T> extends ErrorsAsync<CollectionResult<T>> {
     results: Ref<T[] | undefined>;
     count: Ref<number>;
     pages: Ref<number>;
@@ -92,16 +92,16 @@ class ApiHelper {
         return `${this.apiUrl}/${url}`;
     }
 
-    private unwrap<T>(fetchData: _AsyncData<SuccessResult<T>, FetchError<any>>) {
-        const { data, apiError } = this.unwrapErrors(fetchData);
+    private unwrap<T>(fetchData: ErrorsAsync<SuccessResult<T>>) : ResultsAsync<T> {
+        const { data } = fetchData;
         const result = computed(() => {
             return data.value?.result === 'ok' && 'data' in data.value ? data.value.data : undefined;
         });
-        return <ResultsAsync<T>>{ ...fetchData, result, apiError };
+        return <ResultsAsync<T>>{ ...fetchData, result };
     }
 
-    private unwrapMany<T>(fetchData: _AsyncData<CollectionResult<T>, FetchError<any>>) {
-        const { data, apiError } = this.unwrapErrors(fetchData);
+    private unwrapMany<T>(fetchData: ErrorsAsync<CollectionResult<T>>) : CollectionAsync<T> {
+        const { data } = fetchData;
         const results = computed(() => {
             return data.value?.result === 'ok' && 'data' in data.value ? data.value.data : [];
         });
@@ -111,10 +111,10 @@ class ApiHelper {
         const pages = computed(() => {
             return data.value?.result === 'ok' ? data.value.pages : 0;
         })
-        return <CollectionAsync<T>>{ ...fetchData, results, apiError, count, pages };
+        return <CollectionAsync<T>>{ ...fetchData, results, count, pages };
     }
 
-    private unwrapErrors<T>(fetchData: _AsyncData<T, FetchError<any>>) {
+    private unwrapErrors<T>(fetchData: _AsyncData<T, FetchError<any>>): ErrorsAsync<T> {
         const { error, data } = fetchData;
         const apiError = computed(() => {
             const target: FailureResult = data.value || error.value?.data;
@@ -151,7 +151,7 @@ class ApiHelper {
         return this.unwrapMany(res);
     }
 
-    async post<T>(url: string, body: any, params?: Params, lazy: boolean = false) {
+    async post<T>(url: string, body: any, params?: Params, lazy: boolean = false): Promise<ErrorsAsync<T>> {
         const res = await this.request<T>(url, 'POST', body, params, lazy);
         return this.unwrapErrors(res);
     }
@@ -197,3 +197,69 @@ class ApiHelper {
 }
 
 export const api = new ApiHelper();
+
+export function isCodeSuccess(code: number) {
+    return code >= 200 && code < 300;
+}
+
+export class Bytes {
+    static bitLength(number: number) {
+        return Math.floor(Math.log2(number)) + 1;
+    }
+      
+    static byteLength(number: number) {
+        return Math.ceil(Bytes.bitLength(number) / 8);
+    }
+    
+    static to(number: number) {
+        if (!Number.isSafeInteger(number)) {
+            throw new Error("Number is out of range");
+        }
+    
+        const size = number === 0 ? 0 : Bytes.byteLength(number);
+        const bytes = new Uint8ClampedArray(size);
+        let x = number;
+        for (let i = (size - 1); i >= 0; i--) {
+            const rightByte = x & 0xff;
+            bytes[i] = rightByte;
+            x = Math.floor(x / 0x100);
+        }
+    
+        return Array.from(bytes);
+    }
+    
+    static from(buffer: number[]) {
+        const bytes = new Uint8ClampedArray(buffer);
+        const size = bytes.byteLength;
+        let x = 0;
+        for (let i = 0; i < size; i++) {
+            const byte = bytes[i];
+            x *= 0x100;
+            x += byte;
+        }
+        return x;
+    }
+}
+
+export function debounce<T>(fun: (arg: T) => void, wait: number)  {
+    let timer: NodeJS.Timer;
+    return (arg: T) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            fun(arg);
+        }, wait);
+    }
+}
+
+export function throttle(fun: Function, wait: number) {
+    let throttled = false;
+    return function(...args: any) {
+        if (throttled) return;
+
+        fun(...args);
+        throttled = true;
+        setTimeout(() => {
+            throttled = false;
+        }, wait);
+    }
+}

@@ -12,6 +12,8 @@ public class ApiResult
 
 	public ApiResult() { }
 
+	public ApiResult(int code) : this(code, code >= 200 && code < 300 ? "ok" : "error") { }
+
 	public ApiResult(int code, string result)
 	{
 		Code = code;
@@ -19,6 +21,18 @@ public class ApiResult
 	}
 
 	public ApiResult(HttpStatusCode code, string result) : this((int)code, result) { }
+
+	public ApiResult(HttpStatusCode code) : this((int)code) { }
+}
+
+public class MessageResult : ApiResult
+{
+	public string? Message { get; set; }
+
+	public MessageResult(int code, string message) : base(code)
+	{
+		Message = message;
+	}
 }
 
 public class SuccessResult : ApiResult
@@ -44,6 +58,8 @@ public class CollectionResult<T> : SuccessResult<T[]>
 
 	[JsonPropertyName("count")]
 	public int Count { get; set; }
+
+	public CollectionResult() : base(Array.Empty<T>()) { }
 
 	public CollectionResult(PaginatedResult<T> results) : base(results.Results)
 	{
@@ -101,9 +117,21 @@ public static class ApiResults
 {
 	public static SuccessResult Empty => new();
 
+	public static SuccessResult Success() => new();
+
 	public static SuccessResult<T> Success<T>(T data) => new(data);
 
 	public static CollectionResult<T> Success<T>(PaginatedResult<T> results) => new(results);
+
+	public static CollectionResult<T> Collection<T>(IEnumerable<T> data, int pages, int count)
+	{
+		return new CollectionResult<T>()
+		{
+			Data = data.ToArray(),
+			Count = count,
+			Pages = pages
+		};
+	}
 
 	public static FailureResult Error(int code, params string[] errors) => new(code, errors);
 
@@ -118,4 +146,6 @@ public static class ApiResults
 	public static FailureResult NotFound(string resource) => new(HttpStatusCode.NotFound, $"I couldn't find that {resource}.");
 
 	public static UpsertResult Created(long id, string resource) => new(id, resource);
+
+	public static MessageResult Message(int code, string message) => new(code, message);
 }

@@ -12,7 +12,6 @@ public abstract class OrmMap<T> where T : DbObject
 	private static string? _paginateQuery;
 	private static string? _getQuery;
 	private static string? _getWithDeletedQuery;
-	private static string? _upsertQuery;
 	private static string? _upsertFakeSelect;
 	private static string? _upsertFakeInsert;
 	private static string? _upsertFakeUpdate;

@@ -20,11 +20,17 @@ public class DbWebhook : DbObject
     [JsonPropertyName("discordData")]
     [Column("discord_data")]
     public Webhook? DiscordData { get; set; }
+
+    [JsonPropertyName("discordScript")]
+    [Column("discord_script")]
+    public string? DiscordScript { get; set; }
 }
 
 public enum WebhookType
 {
+    Disabled = 0,
     Discord = 1,
     Json = 2,
     Xml = 3,
+	DiscordScript = 4,
 }

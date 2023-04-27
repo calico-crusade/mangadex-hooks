@@ -1,3 +1,8 @@
+// import MonacoEditorNlsPlugin, {
+//     esbuildPluginMonacoEditorNls,
+//     Languages,
+// } from 'vite-plugin-monaco-editor-nls';
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 if (process.env.ENV_PROFILE) {
     require("dotenv").config({
@@ -34,9 +39,15 @@ export default defineNuxtConfig({
     },
     components: [
         '~/components/general',
+        '~/components/webhooks',
+        '~/components/popups',
+        '~/components/search',
         '~/components'
     ],
     routeRules: {
         '/webhooks/**': { ssr: false }
-    }
+    },
+    modules: [
+        // 'nuxt-monaco-editor'
+    ]
 });

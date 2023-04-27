@@ -12,7 +12,10 @@
 
     marked.setOptions({
         highlight: (code, lang) => {
-            return hljs.default.highlight(lang, code).value;
+            return hljs.default.highlight(code, {
+                language: lang || 'text',
+                ignoreIllegals: true 
+            }).value;
         }
     });
 
